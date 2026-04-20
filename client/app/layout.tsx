@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
-import { ClerkProvider } from '@clerk/nextjs'
+import { AuthProvider } from '@/context/AuthContext'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'RAG PDF Chatbot',
+  title: 'RAGbot AI',
   description: 'Chat with your PDF documents',
+  icons: { icon: '/applogo.png' }
 }
 
 export default function RootLayout({
@@ -15,9 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased font-sans">
-        <ClerkProvider>
+        <AuthProvider>
           {children}
-        </ClerkProvider>
+        </AuthProvider>
       </body>
     </html>
   )
