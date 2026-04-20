@@ -31,12 +31,12 @@ export const chatController = async (req, res) => {
         );
 
         // Filtered similarity search — only chunks from this user's specific document
-        const docs = await vectorStore.similaritySearch(userQuery, 5, {
-            must: [
-                { key: 'metadata.userId', match: { value: userId } },
-                { key: 'metadata.documentId', match: { value: documentId } },
-            ],
-        });
+        const similarDocs = await vectorStore.similaritySearch(userQuery, 10);
+        
+        // Post-filter results by userId and documentId
+        const docs = similarDocs.filter(doc => 
+            doc.metadata?.userId === userId && doc.metadata?.documentId === documentId
+        );
 
         console.log(`Retrieved ${docs.length} docs`);
 
@@ -58,6 +58,6 @@ export const chatController = async (req, res) => {
         });
     } catch (error) {
         console.error('Chat failed:', error.message);
-        return res.status(500).json({ success: false, message: 'Chat processing failed' });
+        return res.status(500).json({ success: false, message: 'Chat processing failed: ' + error.message });
     }
 };
