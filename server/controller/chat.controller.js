@@ -31,12 +31,12 @@ export const chatController = async (req, res) => {
         );
 
         // Filtered similarity search — only chunks from this user's specific document
-        const similarDocs = await vectorStore.similaritySearch(userQuery, 10);
-        
-        // Post-filter results by userId and documentId
-        const docs = similarDocs.filter(doc => 
-            doc.metadata?.userId === userId && doc.metadata?.documentId === documentId
-        );
+        const docs = await vectorStore.similaritySearch(userQuery, 5, {
+            must: [
+                { key: 'metadata.userId', match: { value: userId } },
+                { key: 'metadata.documentId', match: { value: documentId } },
+            ],
+        });
 
         console.log(`Retrieved ${docs.length} docs`);
 
