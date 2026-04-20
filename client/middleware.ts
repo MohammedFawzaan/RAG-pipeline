@@ -7,21 +7,8 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get('token')?.value;
 
-    // Allow public routes (exact match for '/')
-    const isPublic = PUBLIC_ROUTES.includes(pathname);
-
-    if (isPublic) {
-        if (token) {
-            return NextResponse.redirect(new URL('/chat', request.url));
-        }
-        return NextResponse.next();
-    }
-
-    // Protected routes — redirect to landing if no token
-    if (!token) {
-        return NextResponse.redirect(new URL('/', request.url));
-    }
-
+    // Cross-domain limitation: External backend cookies aren't visible to Vercel middleware
+    // We will handle protection inside the ChatPage component instead.
     return NextResponse.next();
 }
 

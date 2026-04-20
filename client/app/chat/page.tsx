@@ -17,10 +17,19 @@ export default function ChatPage() {
     const [files, setFiles] = React.useState<DocFile[]>([]);
     const [activeDocumentId, setActiveDocumentId] = React.useState<string | null>(null);
     const [activeDocumentName, setActiveDocumentName] = React.useState<string | null>(null);
-    const { user, logout } = useAuth();
+    const { user, logout, isLoading } = useAuth();
+    const router = React.useMemo(() => typeof window !== 'undefined' ? window : null, []);
+
+    // Protection logic: if not loading and no user, kick back to landing
+    React.useEffect(() => {
+        if (!isLoading && !user) {
+            window.location.href = '/';
+        }
+    }, [user, isLoading]);
 
     // Load user's file list on mount
     React.useEffect(() => {
+        if (!user) return; // Wait for user to be available
         getFiles()
             .then(data => {
                 if (data.success && data.files.length > 0) {
@@ -82,6 +91,13 @@ export default function ChatPage() {
             )}
         </div>
     );
+
+    if (isLoading) return <div className="h-screen bg-[#F5F6FA] flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-500 text-sm font-semibold animate-pulse tracking-wide">SECURELY LOADING YOUR CHATS...</p>
+        </div>
+    </div>;
 
     return (
         <main className="h-screen bg-[#F5F6FA] text-gray-800 flex flex-col font-sans overflow-hidden">
