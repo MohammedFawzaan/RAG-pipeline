@@ -12,6 +12,9 @@ import authRouter from './routes/auth.routes.js';
 dotenv.config();
 const app = express();
 
+// Important for deployment - reverse proxy.
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors({
     origin: process.env.FRONTEND_URL,
