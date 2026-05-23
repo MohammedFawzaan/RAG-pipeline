@@ -61,13 +61,16 @@ export const getFilesController = async (req, res) => {
                         must: [{ key: 'metadata.userId', match: { value: userId } }],
                     },
                     limit: 1000,
-                    with_payload: { include: ['metadata'] },
-                    with_vector: false,
+                    with_payload: true,
+                    with_vectors: false,
                 }),
             }
         );
 
-        if (!response.ok) throw new Error(`Qdrant scroll failed: ${response.status}`);
+        if (!response.ok) {
+            const body = await response.text();
+            throw new Error(`Qdrant scroll failed: ${response.status} — ${body}`);
+        }
 
         const { result } = await response.json();
         const points = result?.points ?? [];
