@@ -1,27 +1,24 @@
 import jwt from "jsonwebtoken";
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    ...(process.env.COOKIE_DOMAIN && { domain: process.env.COOKIE_DOMAIN }),
+};
+
 export const googleAuthCallback = (req, res) => {
     const user = req.user;
     const payload = { googleId: user.googleId, name: user.name, email: user.email, avatar: user.avatar };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3d' });
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('token', token, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
-        maxAge: 3 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('token', token, { ...cookieOptions, maxAge: 3 * 24 * 60 * 60 * 1000 });
     res.redirect(`${process.env.FRONTEND_URL}/chat`);
 };
 
 export const logoutController = (req, res) => {
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
-        path: '/'
-    });
+    res.clearCookie("token", { ...cookieOptions, path: '/' });
     res.status(200).json({ success: true, message: 'Logout successful' });
 };
 

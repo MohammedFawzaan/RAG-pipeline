@@ -18,18 +18,15 @@ export default function ChatPage() {
     const [activeDocumentId, setActiveDocumentId] = React.useState<string | null>(null);
     const [activeDocumentName, setActiveDocumentName] = React.useState<string | null>(null);
     const { user, logout, isLoading } = useAuth();
-    const router = React.useMemo(() => typeof window !== 'undefined' ? window : null, []);
 
-    // Protection logic: if not loading and no user, kick back to landing
     React.useEffect(() => {
         if (!isLoading && !user) {
             window.location.href = '/';
         }
     }, [user, isLoading]);
 
-    // Load user's file list on mount
     React.useEffect(() => {
-        if (!user) return; // Wait for user to be available
+        if (!user) return;
         getFiles()
             .then(data => {
                 if (data.success && data.files.length > 0) {
@@ -39,15 +36,14 @@ export default function ChatPage() {
                 }
             })
             .catch(() => { });
-    }, []);
+    }, [user]);
 
-    // Called by FileUploadComponent after a successful upload
     const handleUploadSuccess = (documentId: string, fileName: string) => {
         const newFile: DocFile = { documentId, fileName, uploadedAt: new Date().toISOString() };
         setFiles(prev => [newFile, ...prev]);
         setActiveDocumentId(documentId);
         setActiveDocumentName(fileName);
-        setIsUploadOpen(false); // close mobile overlay after upload
+        setIsUploadOpen(false);
     };
 
     const selectDocument = (file: DocFile) => {

@@ -16,10 +16,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Middleware
-app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
-}));
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -29,6 +26,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+    },
 }));
 
 // Passport initialization
@@ -58,6 +60,10 @@ passport.deserializeUser((user, done) => done(null, user));
 app.use('/api/auth', authRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/upload', uploadRouter);
+
+app.get('/api', (req, res) => {
+    res.json('RAG PDF Chatbot Server is running!');
+});
 
 app.get('/', (req, res) => {
     res.send('RAG PDF Chatbot Server is running!');

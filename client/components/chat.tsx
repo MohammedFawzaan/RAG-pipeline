@@ -62,6 +62,10 @@ const ChatComponent: React.FC<ChatProps> = ({ onUploadClick, activeDocumentId, a
             ]);
         } catch (error) {
             console.error('Chat failed', error);
+            setMessages((prev) => [
+                ...prev,
+                { role: 'assistant', content: 'Something went wrong. Please try again.' },
+            ]);
         } finally {
             setIsLoading(false);
         }

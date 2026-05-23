@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import fs from 'fs';
 import { Worker } from "bullmq";
 import { QdrantVectorStore } from "@langchain/qdrant";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
@@ -6,7 +7,7 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 const worker = new Worker('file-upload-queue', async (job) => {
-    const { fileName, path, userId, documentId } = job.data;
+    const { fileName, path, userId, documentId, uploadedAt } = job.data;
     console.log('Processing job:', fileName);
 
     /*
@@ -39,6 +40,7 @@ const worker = new Worker('file-upload-queue', async (job) => {
             userId,
             documentId,
             fileName,
+            uploadedAt,
         },
     }));
 
@@ -60,14 +62,17 @@ const worker = new Worker('file-upload-queue', async (job) => {
     await vectorStore.addDocuments(taggedChunks);
     console.log(`✅ ${taggedChunks.length} chunks embedded and stored for "${fileName}" [user: ${userId}, doc: ${documentId}]`);
 
+    // Remove the temp file now that it's safely in Qdrant
+    fs.unlink(path, (err) => { if (err) console.warn(`Could not delete temp file ${path}:`, err.message); });
+
 }, {
     concurrency: 5,
     // connection: { host: 'localhost', port: 6379 },
     connection: {
         host: process.env.UPSTASH_REDIS_REST_URL?.replace('https://', ''),
-        port: Number(process.env.UPSTASH_REDIS_REST_PORT) || 6379,
+        port: Number(process.env.UPSTASH_REDIS_REST_PORT),
         password: process.env.UPSTASH_REDIS_REST_TOKEN,
-        tls: {}, // Required for Upstash
+        tls: {},
     },
 });
 

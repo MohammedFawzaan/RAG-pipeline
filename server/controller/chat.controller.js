@@ -58,6 +58,6 @@ export const chatController = async (req, res) => {
         });
     } catch (error) {
         console.error('Chat failed:', error.message);
-        return res.status(500).json({ success: false, message: 'Chat processing failed: ' + error.message });
+        return res.status(500).json({ success: false, message: 'Chat processing failed. Please try again.' });
     }
 };
