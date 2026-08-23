@@ -1,0 +1,35 @@
+Qdrant DB URL - https://cloud.qdrant.io/accounts/876cfb8c-8956-41fa-b5e5-e229cc144d21/clusters/e96d3f14-5c8e-4f65-8b5a-57d3c4e70410/overview
+View Collections - https://e96d3f14-5c8e-4f65-8b5a-57d3c4e70410.us-west-2-0.aws.cloud.qdrant.io:6333/dashboard
+
+--Add Payload Indexes--
+
+Add index for metadata.userId:
+PUT /collections/ragbot-docs/index
+{
+  "field_name": "metadata.userId",
+  "field_schema": "keyword"
+}
+
+Add index for metadata.documentId:
+PUT /collections/ragbot-docs/index
+{
+  "field_name": "metadata.documentId",
+  "field_schema": "keyword"
+}
+
+--Delete All Points from the Collection--
+
+POST /collections/ragbot-docs/points/delete
+{
+  "filter": {}
+}
+
+--Recreate the Collection from Scratch--
+PUT /collections/ragbot-docs
+{
+  "vectors": {
+    "size": 3072,
+    "distance": "Cosine"
+  }
+}
+```
